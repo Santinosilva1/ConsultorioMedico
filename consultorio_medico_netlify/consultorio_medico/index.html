@@ -141,9 +141,11 @@ async function iniciarSesion() {
   mostrarSistema();
 }
 
-function mostrarSistema() {
+async function mostrarSistema() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('home').style.display = '';
+
+  await cargarPacientesSupabase();
 }
 
 function mostrarLogin() {
@@ -190,6 +192,59 @@ let current=null,currentTab='datos',coverage='Todos';
 const $=s=>document.querySelector(s);
 function localISO(){let d=new Date(),o=d.getTimezoneOffset();return new Date(d-o*60000).toISOString().slice(0,10)}
 function save(){localStorage.setItem(KEY,JSON.stringify(patients));renderDashboard()}
+async function cargarPacientesSupabase() {
+  const { data: authData } = await db.auth.getUser();
+
+  if (!authData.user) {
+    console.log('No hay usuario autenticado.');
+    return;
+  }
+
+  const { data: perfil, error: errorPerfil } = await db
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', authData.user.id)
+    .single();
+
+  if (errorPerfil || !perfil) {
+    console.error(errorPerfil);
+    alert('No se pudo identificar el consultorio.');
+    return;
+  }
+
+  const { data, error } = await db
+    .from('patients')
+    .select('*')
+    .eq('organization_id', perfil.organization_id)
+    .order('last_name', { ascending: true })
+    .order('first_name', { ascending: true });
+
+  if (error) {
+    console.error(error);
+    alert('No se pudieron cargar los pacientes.');
+    return;
+  }
+
+  patients = (data || []).map(p => ({
+    id: p.id,
+    nombre: [p.first_name, p.last_name].filter(Boolean).join(' '),
+    dni: p.dni || '',
+    nacimiento: p.birth_date || '',
+    telefono: p.phone || '',
+    direccion: p.address || '',
+    cobertura: p.coverage || '',
+    afiliado: p.affiliate_number || '',
+    alergias: p.allergies || '',
+    antecedentes: p.relevant_history || '',
+    medicacion: p.habitual_medication || '',
+    consultas: [],
+    estudios: [],
+    recetas: [],
+    ordenes: []
+  }));
+
+  renderDashboard();
+}
 function fmt(d){if(!d)return '-';let [y,m,da]=d.split('-');return `${da}/${m}/${y}`}
 function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'')}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
