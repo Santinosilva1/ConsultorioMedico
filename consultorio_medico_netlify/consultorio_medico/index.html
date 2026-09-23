@@ -252,8 +252,7 @@ function age(d){if(!d)return null;let b=new Date(d+'T12:00:00'),n=new Date(),a=n
 function initials(n){return String(n||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()}
 function lastConsult(p){return (p.consultas||[]).slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''))[0]}
 function patientRow(p){let last=lastConsult(p);return `<div class="patient"><div><b>${esc(p.nombre)}</b><br><small>DNI ${esc(p.dni||'Pendiente')} · ${esc(p.cobertura||'Sin cobertura')} · ${esc(p.telefono||'Sin teléfono')}${last?' · Última consulta '+fmt(last.fecha):''}</small></div><button class="primary open" data-id="${p.id}">Abrir ficha</button></div>`}
-function bindOpen(){document.querySelectorAll('.open').forEach(b=>b.onclick=()=>openPatient(+b.dataset.id))}
-function list(arr){$('#results').innerHTML=arr.length?arr.map(patientRow).join(''):'<p>No se encontraron pacientes.</p>';bindOpen()}
+function bindOpen(){document.querySelectorAll('.open').forEach(b=>b.onclick=()=>openPatient(b.dataset.id))}function list(arr){$('#results').innerHTML=arr.length?arr.map(patientRow).join(''):'<p>No se encontraron pacientes.</p>';bindOpen()}
 function coverageButtons(){
  let opts=['Todos',...Array.from(new Set(patients.map(p=>p.cobertura).filter(Boolean))).sort()];
  return `<div class="coverage-filter">${opts.map(x=>`<button class="${coverage===x?'active':''}" data-cov="${esc(x)}">${esc(x)}</button>`).join('')}</div>`
