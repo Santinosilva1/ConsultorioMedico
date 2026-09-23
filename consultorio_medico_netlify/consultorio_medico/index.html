@@ -379,7 +379,38 @@ async function guardarPacienteSupabase(d) {
 
   return paciente;
 }
+async function actualizarPacienteSupabase(id, d) {
+  const nombreCompleto = String(d.nombre || '').trim();
+  const partes = nombreCompleto.split(/\s+/);
+  const firstName = partes.shift() || '';
+  const lastName = partes.join(' ');
 
+  const dniLimpio = String(d.dni || '').replace(/\D/g, '');
+
+  const { data: paciente, error } = await db
+    .from('patients')
+    .update({
+      first_name: firstName,
+      last_name: lastName,
+      dni: dniLimpio || null,
+      birth_date: d.nacimiento || null,
+      phone: d.telefono || null,
+      address: d.direccion || null,
+      coverage: d.cobertura || null,
+      affiliate_number: d.afiliado || null
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert('No se pudo actualizar el paciente.');
+    return null;
+  }
+
+  return paciente;
+}
 $('#searchBtn').onclick=search;$('#q').oninput=search;$('#q').onkeydown=e=>{if(e.key==='Enter')search()};$('#allBtn').onclick=()=>{coverage='Todos';allPatients()};
 $('#newBtn').onclick=()=>{let f=$('#patientForm');f.reset();f.editId.value='';$('#patientFormTitle').textContent='Nuevo paciente';$('#patientModal').classList.remove('hidden')};
 $('#backBtn').onclick=()=>{$('#record').classList.add('hidden');$('#home').classList.remove('hidden');current=null;renderDashboard()};
@@ -411,12 +442,15 @@ $('#patientForm').onsubmit = async e => {
   }
 
   // La edición existente sigue funcionando localmente por ahora.
-  const pacienteLocal = patients.find(p => String(p.id) === String(editId));
+  if (editId) {
+  const pacienteActualizado = await actualizarPacienteSupabase(editId, d);
 
-  if (pacienteLocal) {
-    Object.assign(pacienteLocal, d);
-    save();
-  }
+  if (!pacienteActualizado) return;
+
+  alert('Paciente actualizado correctamente.');
+
+  await cargarPacientesSupabase();
+}
 
   e.target.reset();
   $('#patientModal').classList.add('hidden');
