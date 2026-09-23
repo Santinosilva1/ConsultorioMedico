@@ -282,7 +282,7 @@ function renderSummary(){
  let missing=[];if(!current.dni)missing.push('DNI');if(!current.telefono)missing.push('Teléfono');if(!current.cobertura)missing.push('Cobertura');if(current.cobertura==='IOMA'&&!current.afiliado)missing.push('N.º afiliado');
  $('#pendingData').innerHTML=missing.map(x=>`<span class="pending">Dato pendiente: ${x}</span>`).join('')
 }
-function openPatient(id){current=patients.find(p=>p.id===id);if(!current)return;$('#home').classList.add('hidden');$('#record').classList.remove('hidden');currentTab='datos';renderSummary();renderTab()}
+function openPatient(id){current=patients.find(p=>String(p.id)===String(id));if(!current)return;$('#home').classList.add('hidden');$('#record').classList.remove('hidden');currentTab='datos';renderSummary();renderTab()}
 function medicalBoxes(){
  return `<div class="medical-alerts"><div class="medical-box alert"><small>⚠️ Alergias</small><b>${esc(current.alergias||'Sin datos cargados')}</b></div><div class="medical-box"><small>📋 Antecedentes relevantes</small><b>${esc(current.antecedentes||'Sin datos cargados')}</b></div><div class="medical-box"><small>💊 Medicación habitual</small><b>${esc(current.medicacion||'Sin datos cargados')}</b></div></div>`
 }
