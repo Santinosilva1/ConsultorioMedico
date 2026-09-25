@@ -39,7 +39,7 @@ body{overflow-x:hidden}
 }
 @media(max-width:420px){.toolbar{grid-template-columns:1fr}.dashboard-title h2{font-size:24px}.stat strong{font-size:30px}}
 
-</style>
+input[type="checkbox"]{width:20px;height:20px;flex:0 0 auto}.checkbox-label{display:flex;align-items:center;gap:10px;padding:12px;background:#fff7df;border-radius:10px}.field b{overflow-wrap:anywhere}.field{min-width:0}button:disabled{opacity:.6;cursor:wait}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = 'https://ivjaqhbqqjbtlsepjkyt.supabase.co';
@@ -183,7 +183,7 @@ window.addEventListener('load', comprobarSesion);
 <section id="record" class="hidden"><div class="card"><button class="secondary" id="backBtn">← Volver</button><div id="patientSummary" class="patient-head"><h2 id="patientName"></h2><div id="patientMeta" class="patient-meta"></div><div id="pendingData"></div></div><div class="toolbar"><button class="secondary" id="editPatient">✏️ Editar datos</button><button class="secondary" id="printPatient">🖨️ Imprimir ficha</button><a href="https://app.rcta.me/patients/3a83a94a765433ce200f019ab89b30ff5fd7b378" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button type="button" class="primary">💊 RCTA · Recetas / órdenes</button></a></div><div class="tabs"><button class="tab active" data-tab="datos">Datos</button><button class="tab" data-tab="consultas">Consultas</button><button class="tab" data-tab="estudios">📎 Estudios y archivos</button><button class="tab" data-tab="recetas">Recetas</button><button class="tab" data-tab="ordenes">Órdenes médicas</button></div><div id="tabContent"></div><div class="dangerZone"><button class="danger" id="deletePatient">🗑 Eliminar ficha</button></div></div></section>
 </main>
 <div id="deleteModal" class="modal hidden"><div class="modalbox"><h2>Eliminar ficha</h2><p id="deleteText">¿Seguro que querés eliminar este paciente?</p><p style="color:#b42318"><b>Esta acción borra también sus consultas guardadas en esta versión.</b></p><div class="right"><button type="button" class="secondary" id="cancelDelete">Cancelar</button><button type="button" class="danger" id="confirmDelete">Sí, eliminar ficha</button></div></div></div>
-<div id="patientModal" class="modal hidden"><form id="patientForm" class="modalbox"><h2 id="patientFormTitle">Nuevo paciente</h2><input type="hidden" name="editId"><div class="formgrid"><label>Nombre y apellido<input required name="nombre"></label><label>DNI<input required name="dni"></label><label>Fecha de nacimiento<input type="date" name="nacimiento"></label><label>Teléfono<input name="telefono"></label><label class="full">Dirección<input name="direccion"></label><label>Cobertura<select name="cobertura"><option>Particular</option><option>IOMA</option><option>PAMI</option><option>OSDE</option><option>Swiss Medical</option><option>Otra</option></select></label><label>N.º afiliado<input name="afiliado"></label><label>Consultorio<select name="consultorio"><option>Consultorio 1</option><option>Consultorio 2</option><option>Otro</option></select></label><label class="full">Alergias<textarea rows="2" name="alergias" placeholder="Ej.: penicilina. Dejar vacío si no hay datos."></textarea></label><label class="full">Antecedentes relevantes<textarea rows="3" name="antecedentes"></textarea></label><label class="full">Medicación habitual<textarea rows="3" name="medicacion"></textarea></label></div><div class="right"><button type="button" class="secondary close">Cancelar</button><button class="primary">Guardar paciente</button></div></form></div>
+<div id="patientModal" class="modal hidden"><form id="patientForm" class="modalbox"><h2 id="patientFormTitle">Nuevo paciente</h2><input type="hidden" name="editId"><div class="formgrid"><label>Nombres<input required name="nombre" autocomplete="given-name"></label><label>Apellidos<input required name="apellido" autocomplete="family-name"></label><label>DNI<input required name="dni"></label><label>Fecha de nacimiento<input type="date" name="nacimiento"></label><label>Teléfono<input type="tel" name="telefono" autocomplete="tel"></label><label>Email<input type="email" name="email" autocomplete="email"></label><label class="full">Dirección<input name="direccion"></label><label>Cobertura<input name="cobertura" list="coberturasSugeridas" placeholder="Escribí la cobertura"><datalist id="coberturasSugeridas"><option value="Particular"><option value="IOMA"><option value="PAMI"><option value="OSDE"><option value="Swiss Medical"><option value="SANCOR SALUD"></datalist></label><label>Plan<input name="plan" placeholder="Ej.: 310"></label><label class="full checkbox-label"><input type="checkbox" name="coberturaConfirmada"> Cobertura confirmada con el paciente</label><label>N.º afiliado<input name="afiliado"></label><label class="full">Observaciones<textarea name="notas" rows="2"></textarea></label><label class="full">Alergias<textarea rows="2" name="alergias" placeholder="Ej.: penicilina. Dejar vacío si no hay datos."></textarea></label><label class="full">Antecedentes relevantes<textarea rows="3" name="antecedentes"></textarea></label><label class="full">Medicación habitual<textarea rows="3" name="medicacion"></textarea></label></div><div class="right"><button type="button" class="secondary close">Cancelar</button><button class="primary">Guardar paciente</button></div></form></div>
 <div id="entryModal" class="modal hidden"><form id="entryForm" class="modalbox"><h2 id="entryTitle">Nueva consulta</h2><input type="hidden" name="tipo"><div class="formgrid"><label>Fecha<input required type="date" name="fecha"></label><label class="full" id="motivoWrap">Motivo de consulta<textarea rows="2" name="motivo"></textarea></label><label class="full">Detalle / diagnóstico<textarea required rows="4" name="detalle"></textarea></label><label class="full">Indicación / tratamiento<textarea rows="3" name="indicacion"></textarea></label><label class="full" id="obsWrap">Observaciones<textarea rows="3" name="observaciones"></textarea></label></div><div class="right"><button type="button" class="secondary close">Cancelar</button><button class="primary">Guardar</button></div></form></div>
 <script>
 const KEY='consultorio_demo_v1';
@@ -228,6 +228,12 @@ async function cargarPacientesSupabase() {
   patients = (data || []).map(p => ({
     id: p.id,
     nombre: [p.first_name, p.last_name].filter(Boolean).join(' '),
+    nombres: p.first_name || '',
+    apellidos: p.last_name || '',
+    email: p.email || '',
+    plan: p.coverage_plan || '',
+    coberturaPendiente: p.coverage_pending === true,
+    notas: p.notes || '',
     dni: p.dni || '',
     nacimiento: p.birth_date || '',
     telefono: p.phone || '',
@@ -279,6 +285,7 @@ function renderSummary(){
  let a=age(current.nacimiento),parts=[];if(a!==null)parts.push(`${a} años`);if(current.dni)parts.push(`DNI ${esc(current.dni)}`);if(current.cobertura)parts.push(esc(current.cobertura));if(current.afiliado)parts.push(`Af. ${esc(current.afiliado)}`);
  let old=$('#patientSummary');old.innerHTML=`<div class="patient-avatar">${esc(initials(current.nombre))}</div><div class="patient-summary-body"><h2 id="patientName">${esc(current.nombre)}</h2><div id="patientMeta" class="patient-meta">${parts.join(' · ')}${current.telefono?`<br>📞 <a class="phone" href="tel:${esc(current.telefono)}">${esc(current.telefono)}</a>`:''}</div><div id="pendingData"></div></div>`;
  let missing=[];if(!current.dni)missing.push('DNI');if(!current.telefono)missing.push('Teléfono');if(!current.cobertura)missing.push('Cobertura');if(current.cobertura==='IOMA'&&!current.afiliado)missing.push('N.º afiliado');
+ if(current.coberturaPendiente)missing.push('Confirmar cobertura con el paciente');
  $('#pendingData').innerHTML=missing.map(x=>`<span class="pending">Dato pendiente: ${x}</span>`).join('')
 }
 function openPatient(id){current=patients.find(p=>String(p.id)===String(id));if(!current)return;$('#home').classList.add('hidden');$('#record').classList.remove('hidden');currentTab='datos';renderSummary();renderTab()}
@@ -289,7 +296,7 @@ function renderTab(){
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));let c=$('#tabContent');
  if(currentTab==='datos'){
   let a=age(current.nacimiento),last=lastConsult(current);
-  let vals=[['DNI',esc(current.dni||'Dato pendiente')],['Nacimiento',fmt(current.nacimiento)+(a!==null?` · ${a} años`:``)],['Teléfono',current.telefono?`<a class="phone" href="tel:${esc(current.telefono)}">${esc(current.telefono)}</a>`:'Dato pendiente'],['Dirección',esc(current.direccion||'Dato pendiente')],['Cobertura',esc(current.cobertura||'Dato pendiente')],['N.º afiliado',esc(current.afiliado||'Dato pendiente')],['Consultorio',esc(current.consultorio||'Dato pendiente')],['Última consulta',last?fmt(last.fecha):'Sin consultas']];
+  let vals=[['DNI',esc(current.dni||'Dato pendiente')],['Nacimiento',fmt(current.nacimiento)+(a!==null?` · ${a} años`:``)],['Teléfono',current.telefono?`<a class="phone" href="tel:${esc(current.telefono)}">${esc(current.telefono)}</a>`:'Dato pendiente'],['Email',esc(current.email||'Dato pendiente')],['Dirección',esc(current.direccion||'Dato pendiente')],['Cobertura',esc(current.cobertura||'Dato pendiente')],['Plan',esc(current.plan||'Dato pendiente')],['N.º afiliado',esc(current.afiliado||'Dato pendiente')],['Observaciones',esc(current.notas||'Sin observaciones')],['Última consulta',last?fmt(last.fecha):'Sin consultas']];
   c.innerHTML=medicalBoxes()+'<div class="grid">'+vals.map(x=>`<div class="field"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')+'</div>'
  }else if(currentTab==='estudios'){
   current.estudios=current.estudios||[];c.innerHTML=`<div class="uploadbox"><b>📎 Estudios y archivos</b><p style="color:var(--muted)">Registrá tipo de estudio, fecha y descripción. El archivo real se habilitará cuando conectemos almacenamiento privado.</p><button class="primary" id="addStudy">＋ Agregar estudio</button></div><div>${current.estudios.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).map(e=>`<div class="entry"><b>${fmt(e.fecha)} · ${esc(e.detalle)}</b><p>${esc(e.indicacion||'')}</p></div>`).join('')||'<p>No hay estudios registrados.</p>'}</div>`;$('#addStudy').onclick=()=>showEntry('estudios','Agregar estudio / archivo')
@@ -305,155 +312,70 @@ function showEntry(tipo,title){
 function duplicateDni(dni,editingId){
  let n=norm(dni);if(!n)return null;return patients.find(p=>norm(p.dni)===n&&String(p.id)!==String(editingId||''))
 }
-async function guardarPacienteSupabase(d) {
-  const { data: sesionData } = await db.auth.getSession();
-
-  if (!sesionData.session) {
-    alert('La sesión venció. Volvé a iniciar sesión.');
-    return null;
-  }
-
-  const userId = sesionData.session.user.id;
-
-  const { data: perfil, error: perfilError } = await db
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', userId)
-    .single();
-
-  if (perfilError || !perfil) {
-    console.error(perfilError);
-    alert('No se pudo identificar el consultorio.');
-    return null;
-  }
-
-  const dniLimpio = String(d.dni || '').replace(/\D/g, '');
-
-  if (dniLimpio) {
-    const { data: existente, error: buscarError } = await db
-      .from('patients')
-      .select('id, first_name, last_name')
-      .eq('organization_id', perfil.organization_id)
-      .eq('dni', dniLimpio)
-      .maybeSingle();
-
-    if (buscarError) {
-      console.error(buscarError);
-      alert('No se pudo comprobar el DNI.');
-      return null;
-    }
-
-    if (existente) {
-      alert(`Ya existe un paciente con ese DNI: ${existente.first_name} ${existente.last_name}`);
-      return null;
-    }
-  }
-
-  const nombreCompleto = String(d.nombre || '').trim();
-  const partes = nombreCompleto.split(/\s+/);
-  const firstName = partes.shift() || '';
-  const lastName = partes.join(' ');
-
-  const { data: paciente, error } = await db
-    .from('patients')
-    .insert({
-      organization_id: perfil.organization_id,
-      first_name: firstName,
-      last_name: lastName,
-      dni: dniLimpio || null,
-      birth_date: d.nacimiento || null,
-      phone: d.telefono || null,
-      address: d.direccion || null,
-      coverage: d.cobertura || null,
-      affiliate_number: d.afiliado || null
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    alert('No se pudo guardar el paciente en Supabase.');
-    return null;
-  }
-
-  return paciente;
-}
-async function actualizarPacienteSupabase(id, d) {
-  const nombreCompleto = String(d.nombre || '').trim();
-  const partes = nombreCompleto.split(/\s+/);
-  const firstName = partes.shift() || '';
-  const lastName = partes.join(' ');
-
-  const dniLimpio = String(d.dni || '').replace(/\D/g, '');
-
-  const { data: paciente, error } = await db
-    .from('patients')
-    .update({
-      first_name: firstName,
-      last_name: lastName,
-      dni: dniLimpio || null,
-      birth_date: d.nacimiento || null,
-      phone: d.telefono || null,
-      address: d.direccion || null,
-      coverage: d.cobertura || null,
-      affiliate_number: d.afiliado || null
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    alert('No se pudo actualizar el paciente.');
-    return null;
-  }
-
-  return paciente;
+async function guardarDatosPaciente(d, id = null) {
+  const { data: auth, error: authError } = await db.auth.getUser();
+  if(authError || !auth.user) throw new Error('La sesión venció. Volvé a iniciar sesión.');
+  const { data: perfil, error: perfilError } = await db.from('profiles').select('organization_id').eq('id',auth.user.id).single();
+  if(perfilError || !perfil?.organization_id) throw new Error('No se pudo identificar el consultorio.');
+  const dni = String(d.dni || '').replace(/[.\s-]/g,'');
+  if(!/^\d+$/.test(dni)) throw new Error('El DNI debe contener solo números.');
+  const firstName=String(d.nombre||'').trim(),lastName=String(d.apellido||'').trim();
+  if(!firstName || !lastName) throw new Error('Completá nombres y apellidos.');
+  const duplicate=patients.find(p=>String(p.dni||'').replace(/[.\s-]/g,'')===dni && String(p.id)!==String(id));
+  if(duplicate) throw new Error('Ya existe una ficha con ese DNI: '+duplicate.nombre);
+  const values={first_name:firstName,last_name:lastName,dni,
+    birth_date:d.nacimiento||null,phone:String(d.telefono||'').trim()||null,
+    address:String(d.direccion||'').trim()||null,email:String(d.email||'').trim()||null,
+    coverage:String(d.cobertura||'').trim()||null,coverage_plan:String(d.plan||'').trim()||null,
+    affiliate_number:String(d.afiliado||'').trim()||null,coverage_pending:d.coberturaConfirmada!=='on',
+    notes:d.notas||null,allergies:d.alergias||null,relevant_history:d.antecedentes||null,habitual_medication:d.medicacion||null};
+  let query=id ? db.from('patients').update(values).eq('id',id).eq('organization_id',perfil.organization_id)
+    : db.from('patients').insert({...values,organization_id:perfil.organization_id});
+  const {data,error}=await query.select().single();
+  if(error) throw new Error(error.code==='23505'?'Ya existe un paciente con ese DNI.':'No se pudo guardar el paciente. Los datos del formulario siguen disponibles.');
+  return data;
 }
 $('#searchBtn').onclick=search;$('#q').oninput=search;$('#q').onkeydown=e=>{if(e.key==='Enter')search()};$('#allBtn').onclick=()=>{coverage='Todos';allPatients()};
 $('#newBtn').onclick=()=>{let f=$('#patientForm');f.reset();f.editId.value='';$('#patientFormTitle').textContent='Nuevo paciente';$('#patientModal').classList.remove('hidden')};
 $('#backBtn').onclick=()=>{$('#record').classList.add('hidden');$('#home').classList.remove('hidden');current=null;renderDashboard()};
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;renderTab()});
 $('#printPatient').onclick=()=>window.print();
-$('#editPatient').onclick=()=>{if(!current)return;let f=$('#patientForm');f.editId.value=current.id;['nombre','dni','nacimiento','telefono','direccion','cobertura','afiliado','consultorio','alergias','antecedentes','medicacion'].forEach(k=>f.elements[k].value=current[k]||'');$('#patientFormTitle').textContent='Editar paciente';$('#patientModal').classList.remove('hidden')};
+$('#editPatient').onclick=()=>{
+  if(!current)return;
+  const f=$('#patientForm');f.reset();f.elements.editId.value=current.id;
+  f.elements.nombre.value=current.nombres??current.nombre??'';
+  f.elements.apellido.value=current.apellidos??'';
+  ['dni','nacimiento','telefono','email','direccion','cobertura','plan','afiliado','alergias','antecedentes','medicacion','notas'].forEach(k=>f.elements[k].value=current[k]||'');
+  f.elements.coberturaConfirmada.checked=!current.coberturaPendiente;
+  $('#patientFormTitle').textContent='Editar paciente';$('#patientModal').classList.remove('hidden');
+};
 $('#deletePatient').onclick=()=>{if(!current)return;$('#deleteText').textContent=`¿Seguro que querés eliminar la ficha de ${current.nombre}?`;$('#deleteModal').classList.remove('hidden')};$('#cancelDelete').onclick=()=>$('#deleteModal').classList.add('hidden');
 $('#confirmDelete').onclick=()=>{if(!current)return;patients=patients.filter(p=>p.id!==current.id);save();current=null;$('#deleteModal').classList.add('hidden');$('#record').classList.add('hidden');$('#home').classList.remove('hidden');$('#results').innerHTML='';renderDashboard()};
 document.querySelectorAll('.close').forEach(b=>b.onclick=()=>b.closest('.modal').classList.add('hidden'));
 
 $('#patientForm').onsubmit = async e => {
   e.preventDefault();
-
-  const d = Object.fromEntries(new FormData(e.target));
-  const editId = d.editId;
-  delete d.editId;
-
-  // Por ahora conectamos a Supabase solamente los pacientes nuevos.
-  if (!editId) {
-    const pacienteGuardado = await guardarPacienteSupabase(d);
-
-    if (!pacienteGuardado) return;
-
-    alert('Paciente guardado correctamente en Supabase.');
-
-    e.target.reset();
-    $('#patientModal').classList.add('hidden');
-    return;
-  }
-
-  // La edición existente sigue funcionando localmente por ahora.
-  if (editId) {
-  const pacienteActualizado = await actualizarPacienteSupabase(editId, d);
-
-  if (!pacienteActualizado) return;
-
-  alert('Paciente actualizado correctamente.');
-
-  await cargarPacientesSupabase();
-}
-
-  e.target.reset();
-  $('#patientModal').classList.add('hidden');
-};$('#entryForm').onsubmit=e=>{e.preventDefault();let d=Object.fromEntries(new FormData(e.target));current[d.tipo]=current[d.tipo]||[];current[d.tipo].push({fecha:d.fecha,motivo:d.motivo,detalle:d.detalle,indicacion:d.indicacion,observaciones:d.observaciones});save();$('#entryModal').classList.add('hidden');renderSummary();renderTab()};
+  const form=e.target,button=form.querySelector('button[type="submit"],button.primary');
+  if(button.disabled)return;
+  const d=Object.fromEntries(new FormData(form)),editId=d.editId||null;
+  button.disabled=true;button.textContent='Guardando…';
+  try {
+    const saved=await guardarDatosPaciente(d,editId);
+    const previous=patients.find(p=>String(p.id)===String(saved.id));
+    const updated={...previous,id:saved.id,nombre:[saved.first_name,saved.last_name].filter(Boolean).join(' '),
+      nombres:saved.first_name,apellidos:saved.last_name,dni:saved.dni,nacimiento:saved.birth_date||'',
+      telefono:saved.phone||'',email:saved.email||'',direccion:saved.address||'',cobertura:saved.coverage||'',
+      plan:saved.coverage_plan||'',coberturaPendiente:saved.coverage_pending===true,afiliado:saved.affiliate_number||'',
+      notas:saved.notes||'',alergias:saved.allergies||'',antecedentes:saved.relevant_history||'',medicacion:saved.habitual_medication||'',
+      consultas:previous?.consultas||[],estudios:previous?.estudios||[],recetas:previous?.recetas||[],ordenes:previous?.ordenes||[]};
+    if(previous)patients=patients.map(p=>String(p.id)===String(saved.id)?updated:p);else patients.push(updated);
+    if(current && String(current.id)===String(saved.id)){current=updated;renderSummary();renderTab();}
+    renderDashboard();if($('#q').value)search();else allPatients();
+    form.reset();$('#patientModal').classList.add('hidden');alert('Paciente guardado correctamente.');
+  } catch(error){alert(error.message||'No se pudo guardar el paciente.');}
+  finally{button.disabled=false;button.textContent='Guardar paciente';}
+};
+$('#entryForm').onsubmit=e=>{e.preventDefault();let d=Object.fromEntries(new FormData(e.target));current[d.tipo]=current[d.tipo]||[];current[d.tipo].push({fecha:d.fecha,motivo:d.motivo,detalle:d.detalle,indicacion:d.indicacion,observaciones:d.observaciones});save();$('#entryModal').classList.add('hidden');renderSummary();renderTab()};
 $('#exportBackup').onclick=()=>{let blob=new Blob([JSON.stringify({version:1,exportado:new Date().toISOString(),patients},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`consultorio-bovazzi-backup-${localISO()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('#importBackup').onclick=()=>$('#backupFile').click();
 $('#backupFile').onchange=async e=>{let file=e.target.files[0];if(!file)return;try{let data=JSON.parse(await file.text()),arr=Array.isArray(data)?data:data.patients;if(!Array.isArray(arr))throw new Error();if(confirm(`Se restaurarán ${arr.length} pacientes y se reemplazarán los datos de prueba actuales. ¿Continuar?`)){patients=arr;save();$('#results').innerHTML='';renderDashboard()}}catch{alert('No se pudo leer esa copia de seguridad.')}e.target.value=''};
